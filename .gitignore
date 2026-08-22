@@ -6,3 +6,6 @@ data/chroma_db/
 test_lcd_list.py
 test_lcd_list_probe.py
 test_lcd_endpoint_variants.py
+data/processed/chunks.zip
+extensions-backup.txt
+logs/
