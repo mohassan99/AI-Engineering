@@ -98,13 +98,79 @@ END_ANCHOR = (
     "supplier shall be denied as not reasonable and necessary."
 )
 
-# If stripping would leave less than this many characters, the chunk is
-# almost entirely boilerplate to begin with (chunk boundary landed inside
-# or right before the trailer, with nothing distinctive on either side).
-# Embedding a near-empty string would be a worse, degenerate problem than
-# the dilution we're fixing, so fall back to the original (still-diluted)
-# text rather than embedding near-nothing.
-MIN_STRIPPED_LENGTH = 200
+# Threshold for "is there any real content left after stripping known
+# boilerplate anchors" -- used to decide whether a chunk is boilerplate-
+# DOMINANT (drop it) vs. just short-but-real (keep it).
+#
+# NOT an arbitrary number: checked empirically against the real, live
+# corpus (all chunks where strip_boilerplate()+truncate_code_runs()
+# changed the text at all). Results cluster cleanly in two groups with a
+# real gap between them -- nothing landed in between:
+#   - genuinely nothing left: 0 chars (fully consumed), 7 chars
+#     ("GENERAL"), 12 chars ("[Indication]") -- leftover field labels
+#     or section headers with no sentence content at all.
+#   - genuinely real content: 77+ chars, all complete sentences (e.g.
+#     "DRESSINGS The following are specific guidelines for individual
+#     product types.").
+# 30 sits inside that gap. This replaces an earlier version of this
+# threshold (200 chars) that was calibrated for a different question --
+# "is the embedding input near-empty" -- and, when reused to also decide
+# whether to DROP a chunk from the corpus, was catching and discarding
+# short-but-complete, on-topic sentences (verified case: L33738_chunk2's
+# post-strip content, "A facial prosthesis is covered when there is loss
+# or absence of facial tissue due to disease, trauma, surgery, or a
+# congenital defect. GENERAL", is ~140 chars -- entirely real, the exact
+# sentence an eval question asks about -- and was being dropped under
+# the 200-char version of this check before this fix).
+MIN_REAL_CONTENT = 30
+
+
+def _remove_boundary_span(text, start_anchors, end_anchor):
+    """
+    Remove one repeated boilerplate span from `text`, for use as
+    EMBEDDING INPUT ONLY. Handles THREE cases depending on which
+    anchor(s) actually fall inside THIS chunk -- necessary because, under
+    the new ~190-token per-field chunking, a ~305-token boilerplate span
+    routinely gets split across two adjacent chunks (verified: L33738's
+    chunk0 contains the leading start anchor but not its end anchor; the
+    next chunk contains the end anchor but not the start).
+
+    1. BOTH anchors present (start, then end) -- classic case, the whole
+       span sits inside one chunk: cut from start anchor through end of
+       end anchor. Real text before/after the span is preserved.
+    2. ONLY a start anchor present -- the span continues past this
+       chunk's boundary into the next chunk. Nothing after the start
+       anchor in THIS chunk is real content (it's mid-boilerplate), so
+       truncate to end-of-string at the start anchor. This is safe
+       specifically because there's nothing to lose here -- distinct
+       from case 3, which does have something to preserve.
+    3. ONLY the end anchor present -- this chunk is a CONTINUATION of a
+       span that started in the PREVIOUS chunk. Everything from the
+       start of THIS chunk through the end anchor is still boilerplate,
+       so DELETE that prefix segment (not truncate — the whole point is
+       that real content follows it) and keep what remains. Before this
+       fix, this case wasn't handled at all: the leading branch only
+       fired `if start_anchor in text`, so a continuation chunk's
+       boilerplate tail was left sitting in the embedding input,
+       diluting whatever real content followed it in the same chunk.
+    """
+    start_points = [text.find(a) for a in start_anchors if a in text]
+    start_idx = min(start_points) if start_points else -1
+    end_idx = text.find(end_anchor, start_idx if start_idx != -1 else 0)
+
+    if start_idx != -1 and end_idx != -1:
+        # case 1: span removal, real text on either side preserved
+        end = end_idx + len(end_anchor)
+        return (text[:start_idx] + " " + text[end:]).strip()
+    if start_idx != -1 and end_idx == -1:
+        # case 2: nothing real left after the start anchor in this chunk
+        return text[:start_idx].rstrip()
+    if start_idx == -1 and end_idx != -1:
+        # case 3: continuation chunk -- delete the boilerplate prefix,
+        # keep the real content that follows the end anchor
+        end = end_idx + len(end_anchor)
+        return text[end:].lstrip()
+    return text
 
 
 def strip_boilerplate(text):
@@ -118,70 +184,102 @@ def strip_boilerplate(text):
     vector changes; retrieve()/generate()/answer() in rag_pipeline.py
     are unaffected and need no changes.
 
-    Two spans are removed, each via a start-anchor-to-end-anchor SPAN
-    removal (not truncate-to-end-of-string), so real LCD-specific text
-    that sometimes sits before/after a boilerplate block is preserved:
+    Two spans are removed via _remove_boundary_span() above, which
+    handles a span sitting entirely inside one chunk OR split across a
+    chunk boundary in either direction:
 
     1. LEADING: the "For any item to be covered by Medicare, it
-       must..." preamble that opens every LCD's chunk0. This span
-       averages ~305 tokens by itself -- already over the embedding
-       model's 256-token max_seq_length -- so for any LCD thin enough
-       that chunk0 is its only (or first) chunk, this preamble was
-       previously consuming the model's *entire* truncated embedding
-       window before the LCD's actual distinctive content was ever
-       reached.
+       must..." preamble that opens every LCD's indication field. This
+       span averages ~305 tokens by itself -- already over the
+       embedding model's 256-token max_seq_length.
     2. TRAILING: the SWO/WOPD/POD/coding-guideline trailer appended once
        per document before chunking (see START_ANCHORS/END_ANCHOR above).
-
-    If an END anchor isn't found after its START anchor, the chunk
-    simply ends mid-boilerplate at a chunk-split boundary, so truncating
-    to end-of-string for that span is safe -- there's nothing real left
-    in the chunk to lose.
     """
-    # --- leading span ---
-    if LEADING_START_ANCHOR in text:
-        lead_start = text.find(LEADING_START_ANCHOR)
-        lead_end_idx = text.find(LEADING_END_ANCHOR, lead_start)
-        if lead_end_idx != -1:
-            lead_end = lead_end_idx + len(LEADING_END_ANCHOR)
-            text = (text[:lead_start] + " " + text[lead_end:]).strip()
-        else:
-            # preamble start found but chunk ends before the end anchor --
-            # nothing real follows in this chunk, safe to drop to end
-            text = text[:lead_start].rstrip()
-
-    # --- trailing span ---
-    start_points = [text.find(a) for a in START_ANCHORS if a in text]
-    if start_points:
-        start = min(start_points)
-        end_idx = text.find(END_ANCHOR, start)
-        if end_idx != -1:
-            end = end_idx + len(END_ANCHOR)
-            text = (text[:start] + " " + text[end:]).strip()
-        else:
-            text = text[:start].rstrip()
-
+    text = _remove_boundary_span(text, [LEADING_START_ANCHOR], LEADING_END_ANCHOR)
+    text = _remove_boundary_span(text, START_ANCHORS, END_ANCHOR)
     return text
 
 
 def strip_boilerplate_safe(original_text):
     """
-    Wrapper applying both embedding-input-only fixes in sequence, plus the
-    MIN_STRIPPED_LENGTH safety fallback:
+    Wrapper applying both embedding-input-only fixes in sequence:
       1. strip_boilerplate() removes the leading Medicare-purpose preamble
-         and trailing SWO/POD span.
+         and trailing SWO/POD span (in whichever of the three forms
+         applies -- full span, truncate, or continuation-prefix delete;
+         see _remove_boundary_span()).
       2. truncate_code_runs() collapses long HCPCS code enumerations.
-    If the combined result would leave less text than MIN_STRIPPED_LENGTH,
-    the chunk was almost entirely boilerplate/codes to begin with --
-    embedding a near-empty string would be a worse, more degenerate
-    problem than the dilution we're fixing, so fall back to the original
-    (still-diluted) text rather than embedding near-nothing.
+    Callers are expected to have already run is_boilerplate_dominant()
+    and excluded chunks that are near-empty after this same stripping --
+    so in normal use this fallback is defensive, not load-bearing. It
+    exists in case strip_boilerplate_safe() is ever called directly on
+    unfiltered text: if stripping would leave less than MIN_REAL_CONTENT
+    characters, fall back to the original (still-diluted) text rather
+    than embedding near-nothing.
     """
     stripped = strip_boilerplate(original_text)
     stripped = truncate_code_runs(stripped)
-    if len(stripped) < MIN_STRIPPED_LENGTH:
+    if len(stripped) < MIN_REAL_CONTENT:
         return original_text
     return stripped
+
+
+# --- A.1-redo fix (flagged, not yet resolved, in the handoff doc) ---
+#
+# strip_boilerplate() was written for the OLD ~650-word chunking regime,
+# where a full boilerplate span (start anchor -> end anchor) reliably fit
+# inside one chunk. Under the NEW ~190-token, per-field, sentence-aware
+# chunking, the ~305-token leading preamble no longer fits in one chunk --
+# verified against real output: chunk0 of a short LCD's "indication"
+# field contains LEADING_START_ANCHOR but not LEADING_END_ANCHOR; the
+# next chunk contains the tail end of the preamble (matching
+# LEADING_END_ANCHOR) but not the start.
+#
+# Tracing strip_boilerplate_safe() against that chunk0 case: the span
+# removal can't find its end anchor, so it truncates to
+# text[:lead_start] -- collapsing the chunk to just its "[Indication] "
+# label, a few characters. That trips the MIN_STRIPPED_LENGTH fallback,
+# which reverts to the ORIGINAL, unstripped text. Net effect: chunk0
+# gets embedded as near-100% boilerplate, unchanged from before this
+# fix existed. Not a crash, not silently wrong data -- just a chunk that
+# is genuinely, entirely boilerplate, occupying a retrieval slot with
+# zero distinctive signal. Confirmed by testing this exact scenario
+# (start anchor present, end anchor absent) before writing the fix
+# below, not assumed from the handoff description alone.
+#
+# The fix isn't more span logic (there's no span to remove -- there's
+# nothing else in the chunk). It's detection: a single-anchor presence
+# check per chunk, independent of whether a full span matched. If a
+# chunk contains ANY known boilerplate anchor (leading or trailing) AND
+# span-stripping it would leave less than MIN_STRIPPED_LENGTH of real
+# content, the chunk is boilerplate-dominant and is DROPPED from the
+# corpus entirely (not embedded, not stored) -- rather than indexed as
+# dead weight that can only ever occupy a retrieval slot without ever
+# being the right answer.
+def is_boilerplate_dominant(text, min_real_content=MIN_REAL_CONTENT):
+    """
+    True if `text` contains a recognized boilerplate anchor and stripping
+    known boilerplate spans/anchors from it leaves under
+    `min_real_content` characters of real content -- i.e. this chunk IS
+    the boilerplate, not a chunk that merely CONTAINS some boilerplate
+    alongside real content (that second case is what strip_boilerplate()
+    already handles fine via span removal, e.g. the tail-fragment chunk
+    that follows a chunk0 like this one).
+    """
+    has_any_anchor = (
+        LEADING_START_ANCHOR in text
+        or LEADING_END_ANCHOR in text
+        or any(a in text for a in START_ANCHORS)
+        or END_ANCHOR in text
+    )
+    if not has_any_anchor:
+        return False
+
+    # Reuse strip_boilerplate()'s span logic where it applies; for the
+    # single-anchor case it collapses to (nearly) the field label alone,
+    # which is exactly the signal we want.
+    stripped = strip_boilerplate(text)
+    stripped = truncate_code_runs(stripped)
+    return len(stripped) < min_real_content
 
 
 def read_chunks(path):
@@ -202,10 +300,38 @@ if __name__ == "__main__":
     print(f"Loading embedding model '{EMBEDDING_MODEL}' (first run downloads it, ~80MB)...")
     model = SentenceTransformer(EMBEDDING_MODEL)
 
+    # A.1-redo fix: drop boilerplate-dominant chunks (see
+    # is_boilerplate_dominant() above) BEFORE embedding/storing, rather
+    # than let them be embedded as near-100% boilerplate and occupy a
+    # retrieval slot. Logged explicitly since dropping corpus content is
+    # a visible, reportable decision, not a silent side effect.
+    kept, dropped = [], []
+    for c in chunks:
+        if is_boilerplate_dominant(c["text"]):
+            dropped.append(c["id"])
+        else:
+            kept.append(c)
+    print(f"Dropped {len(dropped)}/{len(chunks)} boilerplate-dominant chunks "
+          f"(new chunking regime splits the leading preamble across chunk "
+          f"boundaries; these chunks are entirely or almost entirely that "
+          f"preamble, with no salvageable content of their own).")
+    if dropped:
+        print(f"  Dropped IDs: {dropped}")
+    chunks = kept
+
     print(f"Connecting to Chroma at {CHROMA_PATH}...")
     client = chromadb.PersistentClient(path=CHROMA_PATH)
-    # get_or_create so re-runs don't fail if the collection already exists
-    collection = client.get_or_create_collection(name=COLLECTION_NAME)
+    # Rebuild the collection fresh rather than upsert into a possibly
+    # pre-existing one: the old 650-word chunk IDs and the new per-field,
+    # token-budgeted chunk IDs don't reliably superset one another, so an
+    # upsert-only approach could leave stale vectors from the old regime
+    # sitting in the collection uncontrolled, contaminating the eval.
+    try:
+        client.delete_collection(name=COLLECTION_NAME)
+        print(f"Deleted pre-existing '{COLLECTION_NAME}' collection.")
+    except Exception:
+        pass
+    collection = client.create_collection(name=COLLECTION_NAME)
 
     ids = [c["id"] for c in chunks]
     full_texts = [c["text"] for c in chunks]
