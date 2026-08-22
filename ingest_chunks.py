@@ -237,7 +237,7 @@ def strip_boilerplate_safe(original_text):
 # Tracing strip_boilerplate_safe() against that chunk0 case: the span
 # removal can't find its end anchor, so it truncates to
 # text[:lead_start] -- collapsing the chunk to just its "[Indication] "
-# label, a few characters. That trips the MIN_STRIPPED_LENGTH fallback,
+# label, a few characters. That trips the MIN_REAL_CONTENT fallback,
 # which reverts to the ORIGINAL, unstripped text. Net effect: chunk0
 # gets embedded as near-100% boilerplate, unchanged from before this
 # fix existed. Not a crash, not silently wrong data -- just a chunk that
@@ -250,7 +250,7 @@ def strip_boilerplate_safe(original_text):
 # nothing else in the chunk). It's detection: a single-anchor presence
 # check per chunk, independent of whether a full span matched. If a
 # chunk contains ANY known boilerplate anchor (leading or trailing) AND
-# span-stripping it would leave less than MIN_STRIPPED_LENGTH of real
+# span-stripping it would leave less than MIN_REAL_CONTENT of real
 # content, the chunk is boilerplate-dominant and is DROPPED from the
 # corpus entirely (not embedded, not stored) -- rather than indexed as
 # dead weight that can only ever occupy a retrieval slot without ever
