@@ -1,0 +1,55 @@
+Stage A.4 -- Precision@5 Eval Run
+Eval set: data/eval/eval_set.jsonl (25 questions)
+======================================================================
+[ 1/25] PASS  expected=['L34823']  retrieved_sources=['L34823']
+        Q: What clinical diagnosis and prior treatment history are required for Tumor Treatment Field Therapy (TTFT) to be initially covered?
+[ 2/25] PASS  expected=['L33370']  retrieved_sources=['L33370']
+        Q: What diagnosis must a beneficiary have for a large volume nebulizer and compressor to be covered for humidity delivery?
+[ 3/25] PASS  expected=['L33794']  retrieved_sources=['L33794', 'L33822']
+        Q: What C-peptide and blood sugar testing criteria must be met for an external insulin infusion pump to be covered?
+[ 4/25] PASS  expected=['L33738']  retrieved_sources=['L33737', 'L33738', 'L33787', 'L33793']
+        Q: What are the coverage criteria for a facial prosthesis?
+[ 5/25] PASS  expected=['L33317']  retrieved_sources=['L33317', 'L33686']
+        Q: How many external breast prostheses will Medicare cover per side, and under what circumstances can a replacement be provided?
+[ 6/25] PASS  expected=['L33800']  retrieved_sources=['L33718', 'L33800']
+        Q: When is a respiratory assist device (bi-level PAP, E0470/E0471) covered beyond the initial trial period?
+[ 7/25] PASS  expected=['L33739']  retrieved_sources=['L33739']
+        Q: What must a speech-language pathologist's written evaluation include before a speech generating device (SGD) is covered?
+[ 8/25] PASS  expected=['L33827']  retrieved_sources=['L33803', 'L33827']
+        Q: Which chemotherapy drugs must a beneficiary be receiving for the oral 3-drug antiemetic combination (NK-1 antagonist, 5HT3 antagonist, and dexamethasone) to be covered?
+[ 9/25] PASS  expected=['L33733']  retrieved_sources=['L33733', 'L33788', 'L33789']
+        Q: What mobility-related activities of daily living (MRADL) criteria must be documented to support coverage of a cane or crutches?
+[10/25] PASS  expected=['L33803']  retrieved_sources=['L33370', 'L33794', 'L33803', 'L33828']
+        Q: What quantities of urological supplies (e.g., catheters, drainage bags) does Medicare consider reasonable and necessary per month?
+[11/25] PASS  expected=['L33786']  retrieved_sources=['L33786', 'L33800']
+        Q: Is an intrapulmonary percussive ventilator (IPV) covered for use in the home setting?
+[12/25] PASS  expected=['L33830']  retrieved_sources=['L33642', 'L33692', 'L33830']
+        Q: What beneficiary conditions justify coverage of a Group 1 pressure reducing mattress overlay?
+[13/25] PASS  expected=['L33686']  retrieved_sources=['L33686']
+        Q: What documentation is required to support medical necessity for a custom-fabricated ankle-foot orthosis (AFO)?
+[14/25] PASS  expected=['L33369']  retrieved_sources=['L33369', 'L33641', 'L33686', 'L33787']
+        Q: Under what circumstances is a custom molded shoe (rather than a depth shoe) covered for a beneficiary needing therapeutic diabetic footwear?
+[15/25] PASS  expected=['L33718']  retrieved_sources=['L33718']
+        Q: What adherence data must be documented to continue PAP device coverage after the initial trial?
+[16/25] PASS  expected=['L33832']  retrieved_sources=['L33612', 'L33828', 'L33832']
+        Q: How long after surgery is a tracheostomy care starter kit considered medically necessary?
+[17/25] PASS  expected=['L33690']  retrieved_sources=['L33690']
+        Q: What cardiac risk conditions qualify a beneficiary for a wearable automatic external defibrillator (K0606)?
+[18/25] PASS  expected=['L33799']  retrieved_sources=['L33692', 'L33799', 'L33820']
+        Q: Under what condition would a beneficiary be considered bed-confined absent a patient lift, triggering coverage?
+[19/25] PASS  expected=['L33789']  retrieved_sources=['L33789']
+        Q: What functional evaluation is required before a power mobility device is approved?
+[20/25] PASS  expected=['L34824']  retrieved_sources=['L33797', 'L33800', 'L33824', 'L34824', 'L36267']
+        Q: Are vacuum erection devices (VEDs) covered by Medicare?
+[21/25] PASS  expected=['L33611']  retrieved_sources=['L33611']
+        Q: What sleep study findings support coverage of a custom fabricated oral appliance for obstructive sleep apnea?
+[22/25] PASS  expected=['L33788']  retrieved_sources=['L33788']
+        Q: What criteria must be met for an ultra lightweight manual wheelchair (K0005) to be covered, beyond the general manual wheelchair criteria?
+[23/25] PASS  expected=['L33692']  retrieved_sources=['L33692']
+        Q: What wound stage and prior treatment history are required before an air-fluidized (Group 3) bed is covered?
+[24/25] PASS  expected=['L33792']  retrieved_sources=['L33312', 'L33789', 'L33792']
+        Q: What criteria must be met for a power tilt and/or recline seating system to be covered on a wheelchair?
+[25/25] PASS  expected=['L33821']  retrieved_sources=['L33821']
+        Q: What wound therapy steps must be tried or ruled out before a negative pressure wound therapy (NPWT) pump is covered for a chronic pressure ulcer?
+
+Precision@5: 25/25 = 1.000

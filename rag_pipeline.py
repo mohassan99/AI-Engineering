@@ -39,7 +39,6 @@ def _get_embedding_model():
         _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
     return _embedding_model
 
-
 def _get_collection():
     global _collection
     if _collection is None:
@@ -54,6 +53,11 @@ def _get_anthropic_client():
         _anthropic_client = Anthropic()  # reads ANTHROPIC_API_KEY from env
     return _anthropic_client
 
+# Eagerly initialize the Chroma client at import time, on the main thread.
+# (Lazy init on a worker thread — e.g. LangGraph's ToolNode, which runs
+# tools in a ThreadPoolExecutor — triggers a chromadb bug: see B.2 handoff.)
+_get_collection()
+_get_embedding_model()
 
 def retrieve(query, k=DEFAULT_K):
     """
@@ -151,3 +155,5 @@ if __name__ == "__main__":
     print(f"Query: {result['query']}\n")
     print(f"Answer:\n{result['answer']}\n")
     print(f"Sources used: {result['sources']}")
+
+

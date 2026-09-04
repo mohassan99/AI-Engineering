@@ -1,0 +1,302 @@
+(venv)
+mohas@Lenovo-33PEEPMB MINGW64 /d/Project RAG-Agent-PromptEng/ai-engineering-demo (main)
+$ python orchestrator_graph.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights: 100%|##########| 103/103 [00:00<00:00, 1338.06it/s]
+
+=== Query: What are the coverage criteria for a Group II oxygen concentrator? ===
+[orchestrator] tool_called=True num_tool_calls=2 queries=['Group II oxygen concentrator coverage criteria', 'oxygen concentrator coverage criteria Medicare'] caveat_used=False
+[orchestrator] tool_called=True num_tool_calls=1 queries=['oxygen equipment initial coverage testing requirements blood gas study qualifying test'] caveat_used=False
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+Under the Noridian (Jurisdiction D) Oxygen and Oxygen Equipment LCD (L33797), a "Group II" oxygen concentrator/home oxygen therapy qualification is one of three severity categories used to determine whether home oxygen therapy is reasonable and necessary. To meet **Group II criteria**, a beneficiary must have **both**:
+
+1. **A qualifying blood gas study result** showing:
+   - An arterial PO₂ of **56–59 mm Hg**, **or**
+   - An arterial blood oxygen saturation of **89%**
+
+   (as opposed to Group I, which requires PO₂ ≤55 mm Hg or saturation ≤88%)
+
+2. **AND at least one of the following co-morbid conditions**:
+   - **Dependent edema** suggesting congestive heart failure; or
+   - **Pulmonary hypertension or cor pulmonale**, documented by pulmonary artery pressure measurement, gated blood pool scan, echocardiogram, or "P" pulmonale on EKG (P wave greater than 3 mm in standard leads II, III, or AVF); or
+   - **Erythrocythemia** with a hematocrit greater than 56%.
+
+**Testing requirements that apply to Group II qualification:**
+- The "blood gas study" may be either an arterial blood gas (ABG) test or an oximetry test.
+- The test must be performed by a provider qualified to bill Medicare for it (Part A provider, laboratory, Independent Diagnostic Testing Facility, or treating practitioner). Blood gas studies performed or paid for by the DME supplier are **not acceptable**.
+- Testing must be performed **in-person** by a treating practitioner or other qualified medical professional (oximetry from home sleep testing/polysomnography does not qualify, except under the specific PAP-concurrent-use pathway).
+- The qualifying study may be performed while the beneficiary is on oxygen, as long as the reported values still meet Group I or II thresholds.
+- If both an ABG and oximetry test are done the same day under the same conditions, the ABG result governs coverage determination.
+
+**Additional notes:**
+- If Group II criteria are met, portable oxygen equipment is covered only for use while awake and during exercise (not continuously), since resting/awake saturation is above the Group I threshold.
+- Coverage for a **flow rate greater than 4 LPM** for a Group II beneficiary requires an additional qualifying blood gas study performed specifically while the beneficiary is on 4 or more LPM; without this, payment is limited to the standard fee schedule allowance.
+- Oxygen equipment reimbursement is bundled — all related supplies/accessories are included in the monthly rental payment, and separately billed items will be denied as unbundling.
+
+=== Query: What documentation is required for a power wheelchair under the DME LCD? ===
+[orchestrator] tool_called=True num_tool_calls=2 queries=['power wheelchair documentation requirements', 'power mobility device face-to-face examination and specialty evaluation'] caveat_used=False
+[orchestrator] tool_called=True num_tool_calls=2 queries=['power mobility device face-to-face examination report 7-element order medical records', 'home assessment documentation power wheelchair medical record must support'] caveat_used=False
+[orchestrator] tool_called=True num_tool_calls=2 queries=['detailed written order 7 elements power mobility device documentation requirements section', 'supplier records power mobility device delivery date proof of delivery'] caveat_used=False
+[orchestrator] tool_called=True num_tool_calls=1 queries=['face-to-face encounter exam report treating practitioner mobility examination content required elements power mobility device'] caveat_used=False
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+Under Noridian's Power Mobility Devices LCD (L33789) for Jurisdiction D (California, traditional Medicare), a power wheelchair (PWC) claim must be supported by the following documentation:
+
+**1. Face-to-Face Encounter**
+- The treating practitioner (physician, PA, NP, or CNS) must perform an in-person examination focused on the beneficiary's mobility needs before the order is written.
+- The encounter must be documented as a detailed narrative note in the practitioner's chart (not merely a supplier-generated checklist form), clearly identifying that a major reason for the visit was a mobility evaluation.
+- Documentation should include, as relevant: history of the present condition and past medical history relevant to mobility, symptoms limiting ambulation, causative diagnoses, medications/treatments, progression of ambulatory difficulty, distance/pace the beneficiary can walk, current ambulatory aids used, what has changed to now require a PMD, ability to stand without assistance, and description of the home setting/ability to perform ADLs in the home.
+- A relevant physical examination (weight/height, cardiopulmonary, musculoskeletal, strength/ROM, neurological, gait, balance/coordination) tailored to the individual's condition.
+- The encounter must specifically distinguish the beneficiary's in-home mobility needs from any additional needs for use outside the home, since coverage is based solely on in-home use.
+- A written report of the encounter must be available upon request.
+
+**2. Standard Written Order (SWO)**
+- Required prior to delivery of the PMD base item (Written Order Prior to Delivery, WOPD), per 42 CFR 410.38.
+- The SWO may only be written after the face-to-face encounter requirements are completed.
+- The same treating practitioner who performed the face-to-face encounter must be the one who writes the order for the base item (per Social Security Act §1834(a)(1)(E)(iv)).
+- The SWO may also list associated options/accessories billed separately.
+- If the order is not received prior to delivery, the claim is denied as not reasonable and necessary.
+
+**3. Specialty Evaluation (for certain PWC types)**
+- Required in addition to the face-to-face encounter for a Group 2 Single or Multiple Power Option PWC, any Group 3 PWC, or a power assist system.
+- Must be performed by a licensed/certified medical professional (e.g., PT or OT) or a practitioner with specific training/experience in rehabilitation wheelchair evaluations.
+- The evaluator must have no financial relationship with the supplier.
+- Must document the medical necessity for the wheelchair and its specific features (e.g., power seating system, alternate drive control interface, power assist system), explaining why each option/accessory is needed for the beneficiary's mobility limitation.
+- A written report must be available upon request.
+
+**4. Supplier/ATP Involvement**
+- The wheelchair must be provided by a supplier employing a RESNA-certified Assistive Technology Professional (ATP) who specializes in wheelchairs and has direct, in-person involvement in the wheelchair selection for the beneficiary (required for Group 2 Multiple Power Option, Group 3, and higher-group PWCs).
+
+**5. Proof of Delivery**
+- Standard DMEPOS proof-of-delivery documentation is required; services without appropriate proof of delivery are denied as not reasonable and necessary.
+
+Failure to meet any of these documentation elements results in denial of the claim as not reasonable and necessary.
+
+=== Query: What are the qualifying blood gas values for home oxygen therapy? ===
+[orchestrator] tool_called=True num_tool_calls=1 queries=['qualifying blood gas values for home oxygen therapy'] caveat_used=False
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+Under LCD L33797 (Home Oxygen Therapy), coverage is based on blood gas study results (arterial blood gas or oximetry) performed at the "time of need," falling into one of the following groups:
+
+**Group I** (any of the following):
+- Arterial PO2 ≤ 55 mm Hg, or arterial oxygen saturation ≤ 88%, taken at rest (awake) on room air; **or**
+- Arterial PO2 ≤ 55 mm Hg, or oxygen saturation ≤ 88%, taken during sleep, in a beneficiary who has PO2 ≥ 56 mm Hg (or saturation ≥ 89%) while awake — in this case, oxygen is covered only during sleep; **or**
+- A decrease in arterial PO2 of more than 10 mm Hg, or a decrease in oxygen saturation of more than 5%, from baseline, during sleep, associated with symptoms of hypoxemia (e.g., impaired cognition, nocturnal restlessness/insomnia).
+
+**Group II** (requires both):
+- Arterial PO2 of 56–59 mm Hg or oxygen saturation of 89%; **and**
+- At least one of: dependent edema suggesting congestive heart failure; pulmonary hypertension or cor pulmonale (confirmed by pulmonary artery pressure, gated blood pool scan, echocardiogram, or "P" pulmonale on EKG with P wave >3 mm in leads II, III, or AVF); or erythrocythemia with hematocrit >56%.
+
+**Group III**: Applies when hypoxemia does not meet Group I or II criteria, but a medical condition (e.g., cluster headaches, not all-inclusive) is supported by high-quality, peer-reviewed literature as improved by oxygen therapy.
+
+The qualifying blood gas study must be ordered and evaluated by the treating practitioner, performed by a qualified provider (in person), and the equipment must be shown to improve the beneficiary's condition. If both ABG and oximetry are performed the same day under the same conditions, the ABG result takes precedence for determining coverage.
+
+=== Query: Is a hospital bed covered, and what functional criteria does the patient need to meet? ===
+[orchestrator] tool_called=True num_tool_calls=1 queries=['hospital bed coverage criteria'] caveat_used=False
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+## Hospital Bed Coverage (LCD L33820)
+
+Yes, a hospital bed is covered under traditional Medicare in Jurisdiction D when specific functional criteria are met, based on bed type.
+
+**Fixed Height Hospital Bed (E0250, E0251, E0290, E0291, E0328)**
+Covered if the beneficiary has **one or more** of the following:
+1. A medical condition requiring positioning of the body in ways not feasible with an ordinary bed (note: elevation of the head/upper body less than 30 degrees does not usually qualify), **or**
+2. A need for positioning of the body in ways not feasible with an ordinary bed in order to alleviate pain, **or**
+3. A need for the head of the bed to be elevated more than 30 degrees most of the time due to congestive heart failure, chronic pulmonary disease, or problems with aspiration, **or**
+4. A need for traction equipment that can only be attached to a hospital bed.
+
+**Semi-Electric Hospital Bed (E0260, E0261, E0294, E0295, E0329)**
+Covered if the beneficiary meets one of the fixed-height bed criteria above **and** requires frequent changes in body position and/or has an immediate need for a change in body position.
+
+**Heavy-Duty Extra Wide Hospital Bed (E0301, E0303)**
+Covered if the beneficiary meets a fixed-height bed criterion **and** weighs more than 350 pounds but not more than 600 pounds.
+
+**Extra Heavy-Duty Hospital Bed (E0302, E0304)**
+Covered if the beneficiary meets a hospital bed criterion **and** weighs more than 600 pounds.
+
+**Total Electric Hospital Bed (E0265, E0266, E0296, E0297)**
+**Not covered** — the height adjustment feature is considered a convenience feature and will be denied as not reasonable and necessary.
+
+If documentation does not justify the medical need for the specific bed type billed, or if the beneficiary does not meet any coverage criteria for any hospital bed type, the claim will be denied as not reasonable and necessary.
+
+=== Query: What does Jurisdiction F require for a hospital bed? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus only covers Jurisdiction D (Noridian, California), so I can't confirm the criteria for that jurisdiction, but here's what I can tell you generally:
+
+Jurisdiction F (also administered by Noridian, covering states like North Dakota, South Dakota, Montana, Wyoming, Utah, Arizona, and Alaska) follows Medicare's national hospital bed coverage criteria, which are generally consistent across jurisdictions since they derive from the same national coverage framework. Typically, Medicare requires that a hospital bed be medically necessary based on one or more of the following conditions:
+
+- The patient has a medical condition requiring positioning of the body in ways not feasible with an ordinary bed (e.g., need for head elevation due to congestive heart failure, COPD, or aspiration risk)
+- The patient requires positioning to alleviate pain
+- The patient needs traction equipment that can only be attached to a hospital bed
+- The patient requires frequent changes in body position and/or has an immediate need for a change in body position
+
+For a semi-electric or fully electric hospital bed, additional documentation is usually required showing that the patient needs frequent position changes and that a caregiver is unable to perform manual adjustments, or that the patient needs to independently adjust the bed position.
+
+A detailed written order and clinical documentation from the treating practitioner supporting medical necessity are typically required, along with a face-to-face evaluation. For precise, binding criteria specific to Jurisdiction F, you would need to consult Noridian's LCD documentation for that jurisdiction directly, as specific coverage nuances can vary.
+
+=== Query: Under Jurisdiction K, what's the coverage policy for a CPAP device? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus only covers Jurisdiction D (Noridian, California), so I can't confirm the criteria for that jurisdiction, but here's what I can tell you generally:
+
+Jurisdiction K (also administered by Noridian, but covering different states) follows the same national Medicare DME LCD for CPAP as other jurisdictions, since CPAP coverage policy is largely standardized across DME MACs through a joint LCD. Generally, Medicare covers CPAP for adult obstructive sleep apnea (OSA) when:
+
+1. The patient has a face-to-face clinical evaluation by the treating practitioner prior to the sleep test, documenting symptoms of OSA (snoring, daytime sleepiness, witnessed apneas, etc.).
+2. OSA is diagnosed by an in-lab polysomnogram (PSG) or a covered home sleep test (HST), meeting specific AHI/RDI thresholds (typically AHI/RDI ≥ 15 events/hour, or ≥ 5–14 events/hour with documented symptoms such as excessive daytime sleepiness, hypertension, ischemic heart disease, or history of stroke).
+3. Initial coverage is generally for a 12-week (3-month) trial period.
+4. Continued coverage beyond the initial period requires a documented face-to-face re-evaluation showing clinical benefit and objective evidence of adherence (device usage ≥4 hours per night on at least 70% of nights during a consecutive 30-day period within the first 3 months).
+
+If these criteria are not met, Medicare may instead cover a re-test or a switch to a bilevel PAP device under separate criteria. For jurisdiction-specific documentation requirements, fee schedules, or supplier standards for Jurisdiction K, you would need to consult the Noridian or CGS (depending on current contract assignment) LCD and Policy Article specific to that jurisdiction.
+
+=== Query: Is a knee replacement surgery covered under Medicare? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus is limited to Durable Medical Equipment (DME) coverage, so this falls outside it, but here's what I can tell you generally:
+
+Knee replacement surgery (total or partial knee arthroplasty) is generally covered under Medicare Part A (if performed as an inpatient hospital procedure) or Part B (if performed in an outpatient setting or ambulatory surgical center, which has become more common since Medicare removed total knee arthroplasty from the inpatient-only list). Coverage typically requires the procedure to be deemed medically necessary, usually due to conditions like severe osteoarthritis, joint damage, or significant functional impairment that hasn't responded to conservative treatments such as physical therapy, medications, or injections. Standard Medicare cost-sharing rules apply, including deductibles and coinsurance, and beneficiaries may also need coverage for related services like pre-surgical evaluations, anesthesia, hospital stay (if applicable), and post-surgical rehabilitation. For specific coverage determinations, it's advisable to consult the applicable National Coverage Determination (NCD) or Local Coverage Determination (LCD) related to major joint replacement, as well as verify with Medicare or a healthcare provider based on individual circumstances.
+
+=== Query: Does Medicare cover physical therapy visits after a stroke? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus is limited to Durable Medical Equipment (DME) coverage, so this falls outside it, but here's what I can tell you generally:
+
+Yes, traditional Medicare (Part B, and Part A in inpatient settings) covers physical therapy after a stroke when it is medically necessary and ordered by a physician as part of a plan of care. Coverage typically includes outpatient physical therapy, inpatient rehabilitation facility care, skilled nursing facility rehabilitation (following a qualifying hospital stay), and home health physical therapy if the patient is homebound. There is no longer a hard annual dollar cap on outpatient therapy services, though amounts above a certain threshold require documentation supporting medical necessity, and Medicare may apply targeted medical review above a higher threshold. Coverage requires that the therapy be reasonable, necessary, and provided by a qualified therapist or under appropriate supervision, with periodic reassessment of progress toward functional goals. Standard Part B cost-sharing (20% coinsurance after the deductible) generally applies to outpatient therapy services.
+
+=== Query: What are the coverage criteria for home health nursing visits? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus is limited to Durable Medical Equipment (DME) coverage, so this falls outside it, but here's what I can tell you generally:
+
+Home health nursing visits under traditional Medicare fall under the Medicare Home Health benefit (governed by the Medicare Benefit Policy Manual, Chapter 7), not DME LCDs. General criteria include:
+
+1. **Physician certification** – A physician (or allowed non-physician practitioner) must certify that the patient needs intermittent skilled nursing care, physical therapy, speech-language pathology, or continued occupational therapy.
+2. **Homebound status** – The patient must be homebound, meaning leaving home requires considerable and taxing effort, and absences are infrequent, short in duration, or for medical treatment.
+3. **Plan of care** – Services must be provided under a physician-established and periodically reviewed plan of care.
+4. **Face-to-face encounter** – A face-to-face encounter with a physician or allowed practitioner must occur within required timeframes related to the start of care.
+5. **Skilled and intermittent need** – Nursing care must be reasonable and necessary, and provided on an intermittent basis (generally fewer than 8 hours/day and 28 hours/week, with some exceptions up to 35 hours/week).
+6. **Medicare-certified home health agency** – Services must be furnished by a Medicare-certified home health agency (HHA).
+
+For definitive determinations, consult the Medicare Benefit Policy Manual, Chapter 7, and applicable HHA billing guidance rather than DME LCDs.
+
+=== Query: Does my Medicare Advantage plan cover a wheelchair? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus covers traditional Medicare coverage policy only, not Medicare Advantage, but here's what I can tell you generally:
+
+Medicare Advantage (Part C) plans are required by law to cover at least everything Original Medicare covers, including durable medical equipment (DME) like wheelchairs, since Part C plans must provide all Part A and Part B benefits. However, the specific rules can differ from Original Medicare in several important ways:
+
+- **Network requirements**: Many Medicare Advantage plans require you to get equipment from an in-network supplier, or coverage may be denied or cost more out-of-network.
+- **Prior authorization**: Medicare Advantage plans frequently impose their own prior authorization requirements for wheelchairs, even in cases where traditional Medicare might not.
+- **Cost-sharing**: Copays, coinsurance, and deductibles for DME can vary by plan and may differ from the standard 20% coinsurance under Original Medicare.
+- **Medical necessity criteria**: While plans generally must follow Medicare's national coverage rules, some Medicare Advantage plans apply their own internal medical necessity guidelines that can be stricter for approving specific wheelchair types (manual vs. power, standard vs. complex rehab).
+
+To find out whether your specific plan covers a wheelchair, you would need to contact your Medicare Advantage plan directly (the phone number is on your member ID card) or review your plan's Evidence of Coverage document, since the exact process, network suppliers, and any additional requirements are set by the individual plan rather than by traditional Medicare's national coverage determinations.
+
+=== Query: Will Medicaid cover a hospital bed for home use? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus covers traditional Medicare coverage policy only, not Medicaid, but here's what I can tell you generally:
+
+Medicaid coverage for a home hospital bed varies significantly by state, since Medicaid is jointly administered by federal and state governments with each state setting its own DME coverage rules, documentation requirements, and prior authorization processes. In general, most state Medicaid programs will cover a hospital bed when it is deemed medically necessary — for example, when a patient needs positioning (such as head elevation for breathing conditions), has a condition requiring traction equipment attached to the bed, needs frequent position changes not achievable with an ordinary bed, or requires a bed height adjustment to facilitate transfers or prevent falls. Coverage typically requires a physician's order/prescription and supporting documentation of medical necessity, and the bed is usually obtained through a Medicaid-enrolled DME supplier. Some states may also require prior authorization before the bed is dispensed. To get a definitive answer, you would need to check with the specific state's Medicaid program or Managed Care Organization handling the beneficiary's coverage.
+
+=== Query: What's the capital of France? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+The capital of France is Paris.
+
+=== Query: Can you recommend a good recipe for banana bread? ===
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+Here's a simple, reliable banana bread recipe:
+
+**Ingredients:**
+- 3 ripe bananas, mashed
+- 1/3 cup melted butter
+- 3/4 cup sugar (white or brown)
+- 1 egg, beaten
+- 1 tsp vanilla extract
+- 1 tsp baking soda
+- Pinch of salt
+- 1 1/2 cups all-purpose flour
+
+**Instructions:**
+1. Preheat oven to 350°F (175°C) and grease a 4x8-inch loaf pan.
+2. In a large bowl, mash the ripe bananas with a fork until smooth.
+3. Stir in the melted butter.
+4. Mix in the baking soda and salt.
+5. Add the sugar, beaten egg, and vanilla extract; mix well.
+6. Fold in the flour until just combined (don't overmix).
+7. Pour the batter into the prepared loaf pan.
+8. Bake for 50–60 minutes, or until a toothpick inserted into the center comes out clean.
+9. Let cool in the pan for a few minutes, then transfer to a wire rack to cool completely before slicing.
+
+**Optional add-ins:** chopped walnuts, chocolate chips, or a sprinkle of cinnamon for extra flavor.
+
+=== Query: My doctor mentioned I might need equipment for sleep apnea — what's covered? ===
+[orchestrator] tool_called=True num_tool_calls=2 queries=['Positive Airway Pressure (PAP) device for obstructive sleep apnea coverage criteria', 'CPAP sleep study requirements Medicare coverage'] caveat_used=False
+[orchestrator] tool_called=True num_tool_calls=1 queries=['AHI RDI events per hour criteria PAP device initial coverage'] caveat_used=False
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+Under traditional Medicare (Jurisdiction D/Noridian, California), equipment for obstructive sleep apnea (OSA) is covered as follows:
+
+**Positive Airway Pressure (PAP) Devices — CPAP (E0601) or Bi-level (E0470)**
+
+*Initial coverage requires:*
+1. An **in-person clinical evaluation** by the treating practitioner before the sleep test, assessing the beneficiary for OSA.
+2. A **qualifying sleep test** — either a facility-based polysomnogram (Type I) or a home sleep test (Types II, III, IV, or Other) that is FDA-approved as a diagnostic device, ordered by the treating practitioner, and performed by a qualified entity. The sleep test must show:
+   - AHI/RDI ≥ 15 events/hour (minimum 30 events); **or**
+   - AHI/RDI 5–14 events/hour (minimum 10 events) **with** documented symptoms such as excessive daytime sleepiness, impaired cognition, mood disorder, insomnia, hypertension, ischemic heart disease, or history of stroke.
+3. Confirmation that the diagnosis meets the coverage criteria in effect on the date of service.
+
+*Continued coverage beyond the first 3 months requires:*
+- A **clinical re-evaluation** by the treating practitioner between day 31 and day 91 of therapy, documenting improvement in OSA symptoms; **and**
+- **Objective evidence of adherence** — use of the PAP device ≥4 hours per night on at least 70% of nights during a consecutive 30-day period within the first 3 months.
+
+If these adherence/benefit criteria aren't met, continued coverage of the device and its accessories will be denied as not reasonable and necessary.
+
+**Accessories** (masks, tubing, filters, etc.) are covered only if the coverage criteria for the underlying PAP device itself are met.
+
+**Related equipment:** If oxygen therapy is also being considered for sleep-related oxygen desaturation, both the PAP LCD and the separate Oxygen and Oxygen Equipment LCD criteria must be satisfied — OSA generally must be adequately treated with PAP first before nocturnal oxygen desaturation results can qualify a patient for home oxygen equipment.
+
+**Beneficiaries entering Medicare** with a pre-existing PAP device must have documentation of a prior qualifying sleep test plus a new in-person clinical evaluation after Medicare enrollment confirming continued use and benefit, in order to get Medicare coverage of replacement equipment, rental, or accessories.
+
+=== Query: I'm getting a wound vac after surgery — is that covered? ===
+[orchestrator] tool_called=True num_tool_calls=1 queries=['negative pressure wound therapy wound vac coverage criteria'] caveat_used=False
+[orchestrator] tool_called=True num_tool_calls=1 queries=['NPWT postoperative surgical wound dehiscence criterion B coverage'] caveat_used=False
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=False
+Yes — negative pressure wound therapy (NPWT, "wound vac") pumps and supplies can be covered by traditional Medicare under LCD L33821, but coverage after surgery depends on meeting specific criteria (Criterion B applies to surgical wounds):
+
+**Criterion B – Surgical/Traumatic Wound Complications**
+- The beneficiary has complications of a surgically created wound (e.g., dehiscence) or a traumatic wound (e.g., pre-operative flap or graft site).
+- There must be documentation of medical necessity for accelerated formation of granulation tissue, which cannot be achieved through other available topical wound treatments (e.g., the beneficiary has conditions that won't allow healing within the timeframes achievable with standard dressings).
+- NPWT is covered when treatment is ordered to continue beyond hospital discharge into the home setting.
+
+If neither Criterion A (chronic ulcers) nor Criterion B (surgical/traumatic wound complications) is met, the pump and supplies will be denied as not reasonable and necessary.
+
+**Equipment/Supply Details**
+- Covered items: NPWT pump (E2402), dressing kits (A6550), and canister sets (A7000).
+- The pump (E2402) must be capable of accommodating more than one wound dressing set if the beneficiary has multiple wounds.
+- Supply limits: up to 15 dressing kits per wound per month, and up to 10 canister sets per month (more may be allowed for high-volume exudative wounds exceeding 90 mL/day, which require a stationary pump with the largest-capacity canister).
+
+**Coverage Duration**
+Coverage ends at whichever of these occurs first:
+- The treating practitioner determines adequate wound healing has occurred such that NPWT can be discontinued.
+- No measurable wound healing (improvement in surface area or depth) has occurred over the prior month.
+- Four months have elapsed using NPWT for the most recent wound (including inpatient time before home discharge).
+- The equipment/supplies are no longer being used, regardless of physician order status.
+
+For your post-surgical wound vac to be covered, your medical record needs to document the wound complication (e.g., dehiscence) and why standard topical treatments won't achieve adequate healing.
+(venv)
+mohas@Lenovo-33PEEPMB MINGW64 /d/Project RAG-Agent-PromptEng/ai-engineering-demo (main)
+$ python -c "
+from orchestrator_graph import graph, extract_text
+q = 'Does my Medicare Advantage plan cover a wheelchair?'
+for i in range(2):
+    print(f'--- run {i+1} ---')
+    result = graph.invoke({'messages': [{'role': 'user', 'content': q}]})
+    print(extract_text(result['messages'][-1].content))
+"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights: 100%|##########| 103/103 [00:00<00:00, 758.72it/s]
+--- run 1 ---
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus covers traditional Medicare coverage policy only, not Medicare Advantage, but here's what I can tell you generally:
+
+Medicare Advantage (Part C) plans are required to cover at least the same benefits as traditional Medicare, including durable medical equipment such as wheelchairs, since it's a covered Medicare benefit category. However, individual Medicare Advantage plans often have their own specific rules regarding prior authorization, preferred/in-network suppliers, documentation requirements, and cost-sharing (copays or coinsurance) that can differ from traditional Medicare's Local Coverage Determinations. To find out the exact coverage criteria, network suppliers, and any prior authorization steps required for a wheelchair under your specific plan, you would need to contact your Medicare Advantage plan directly or review your plan's Evidence of Coverage document.
+--- run 2 ---
+[orchestrator] tool_called=False num_tool_calls=0 queries=[] caveat_used=True
+This system's corpus covers traditional Medicare coverage policy only, not Medicare Advantage, but here's what I can tell you generally:
+
+Medicare Advantage (Part C) plans are required to cover at least the same items and services as traditional Medicare, including durable medical equipment such as wheelchairs, when medically necessary. However, Medicare Advantage plans often have their own specific rules, such as requiring prior authorization, using preferred/in-network suppliers, and applying plan-specific documentation or medical necessity criteria that can differ from traditional Medicare's Local Coverage Determinations. To find out whether your specific plan covers a wheelchair, and under what conditions (e.g., network suppliers, prior authorization, cost-sharing), you would need to contact your plan directly or review your plan's Evidence of Coverage document.
+(venv)
+mohas@Lenovo-33PEEPMB MINGW64 /d/Project RAG-Agent-PromptEng/ai-engineering-demo (main)
+$ 
