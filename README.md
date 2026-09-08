@@ -11,7 +11,9 @@ Jurisdiction D (Noridian Healthcare Solutions, LLC), filtered to California.
 (LangGraph agent orchestration) complete — B.1 framework setup, B.2–B.4
 orchestrator build-out, two singleton-race bugs fixed, and the
 follow-up-offer prompt fix verified across 3 independent re-runs (see
-below). Stage C (documented prompt engineering) not yet started.
+below). Stage C (documented prompt engineering, v1 → v2) complete — a
+targeted 3-query re-test confirmed the fix (see below); a full 15-query
+regression run on v2 is a documented open item, not yet done.
 
 ## Why this project
 
@@ -317,6 +319,61 @@ leave-the-door-open impulse in softer form, and it's now reproducible
 rather than a one-off. Candidate for tightening in Stage C's documented
 v1 → v2 iteration, alongside or instead of treating B.4's fix as final.
 
+## Stage C: Documented Prompt Engineering (v1 → v2)
+
+Full write-up, transcripts, and the exact prompt files:
+[`PROMPT_ENGINEERING.md`](./PROMPT_ENGINEERING.md).
+
+**Failure mode.** B.4's follow-up-offer fix (above) banned a specific
+literal phrasing pattern — Claude offering to help further in a later
+turn ("if you'd like", "let me know if..."). It held under its own test
+(3 independent re-runs, zero recurrence). But B.4's second full-set run
+surfaced a softer, functionally identical pattern the literal ban didn't
+cover: closing an out-of-scope answer by redirecting the user to contact
+or consult an external authority ("you would need to contact...", "it's
+advisable to consult...") instead of treating the general information
+already given as the complete answer. Rate across two 15-query runs:
+3/15 → 6/15, including one query (knee replacement) that closed cleanly
+on the first run and failed on the second — same prompt, same query,
+different outcome, which is why this needed a second full pass to catch
+rather than a single run.
+
+**Fix (v1 → v2, one change only).** The routing rules, caveat text, and
+tool description are untouched between v1 and v2. Only the
+closing-instruction paragraph changed: v1 defined the rule *as* an
+enumerated list of banned phrases; v2 states the underlying behavior to
+avoid first — ending an answer by pointing the user toward resolution
+elsewhere, whether that's Claude in a later turn or another party right
+now — with phrase examples as illustrations of that behavior, not its
+boundary.
+
+**Re-test.** 3 example queries, 2 runs each, v1 (live baseline) vs. v2,
+via `prompts/c3_retest.py` (patches `SYSTEM_PROMPT` in memory —
+`orchestrator_graph.py` itself is untouched):
+
+| Query | v1 (2 runs) | v2 (2 runs) |
+|---|---|---|
+| Medicare Advantage wheelchair | fail, fail | clean, clean |
+| Jurisdiction K CPAP | fail, fail | clean, clean |
+| Knee replacement | clean, clean | clean, clean |
+
+**v1: 4/6 failed. v2: 0/6 failed.** The more informative result isn't the
+score, it's *how* v2 stayed clean: v1's Jurisdiction K failure used
+wording ("you should verify... directly through...") that appears in
+neither v2's banned-phrase examples nor either of the two failing
+transcripts v2 was written from — and v2 still closed clean on that same
+query, on different wording again. That's the intended effect of naming
+the underlying behavior instead of matching previously-seen phrasings: it
+generalized past the specific instances it was written from, rather than
+covering only those instances.
+
+**Open item, stated plainly rather than glossed over:** this re-test
+targeted the 3 examples that motivated the fix, not a full 15-query
+regression run. v2 hasn't yet been checked against the in-scope and
+fully-unrelated buckets, which weren't part of this targeted test, or
+re-run at B.4's own two-pass standard. A full 15-query run on v2 is the
+natural next step before calling this fully closed.
+
 ## Project files
 
 | File | Purpose |
@@ -331,6 +388,10 @@ v1 → v2 iteration, alongside or instead of treating B.4's fix as final.
 | `agent_wraps_retrieve.py` | B.2 — tool wrap (`retrieve_tool`) around `rag_pipeline.retrieve()` |
 | `orchestrator_graph.py` | B.3/B.4 — `StateGraph` orchestrator, scope-routing system prompt, observability logging, 15-query B.4 test set |
 | `B4_test_log.xlsx` | B.4 — 15-query test log (query / group / bucket / routing correct? / caveat verbatim? / closed cleanly? / notes) |
+| `PROMPT_ENGINEERING.md` | Stage C — v1 → v2 failure-mode write-up, transcripts, re-test result |
+| `prompts/v1_orchestrator_system_prompt.txt` | Stage C — exact baseline orchestrator system prompt |
+| `prompts/v2_orchestrator_system_prompt.txt` | Stage C — candidate fix, one change from v1 (closing-instruction paragraph only) |
+| `prompts/c3_retest.py` | Stage C — re-test script; patches `SYSTEM_PROMPT` in memory, doesn't modify `orchestrator_graph.py` |
 
 ## Roadmap
 
@@ -339,8 +400,11 @@ v1 → v2 iteration, alongside or instead of treating B.4's fix as final.
   singleton-race bugs found and fixed, 15-query test set run twice (14/15
   then 15/15 on the literal follow-up-offer check), fix verified across 3
   independent re-runs (see Stage B section above).
-- **Stage C:** documented prompt-engineering iteration (v1 → v2) on the
-  system's most important prompt. The B.4 follow-up-offer instruction
-  (v1, now verified against its original failure mode) is the natural v1
-  baseline for this stage — the newly surfaced "advisory redirect" pattern
-  (6/15 on B.4's second run) is a candidate for what v2 tightens next.
+- **Stage C: complete, with one open item.** Documented v1 → v2 prompt
+  iteration on the orchestrator's closing instruction — the "advisory
+  redirect" pattern B.4 surfaced (6/15 on its second run) is addressed by
+  naming the underlying behavior instead of the specific phrasing (0/6 on
+  a targeted 3-query re-test, vs. 4/6 on v1). See Stage C section above
+  and [`PROMPT_ENGINEERING.md`](./PROMPT_ENGINEERING.md) for full detail.
+  **Open:** v2 hasn't been re-run against the full 15-query set — a
+  natural next step if this project continues.
