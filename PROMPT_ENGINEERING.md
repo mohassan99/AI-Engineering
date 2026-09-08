@@ -94,22 +94,72 @@ both banned-phrase families plus a second wrong/right example built
 directly from Example 1 above, so the model has a concrete instance of
 the exact pattern it was producing, not just an abstract rule.
 
-**Re-test status:** pending. `prompts/c3_retest.py` re-runs the 3
-queries above against v1 (as committed, for a live baseline) and then v2,
-twice each, without modifying `orchestrator_graph.py` — it patches the
-module's `SYSTEM_PROMPT` in memory before each call. Run it locally:
+**Re-test.** `prompts/c3_retest.py` re-ran the 3 example queries from
+C.2 against v1 (as committed, for a live same-session baseline) and then
+v2, twice each, without modifying `orchestrator_graph.py` — it patches
+the module's `SYSTEM_PROMPT` in memory before each call.
 
-```bash
-python prompts/c3_retest.py
-```
+| Query | v1 run 1 | v1 run 2 | v2 run 1 | v2 run 2 |
+|---|---|---|---|---|
+| MA wheelchair | fail | fail | clean | clean |
+| Jurisdiction K CPAP | fail | fail | clean | clean |
+| Knee replacement | clean | clean | clean | clean |
 
-Paste the output back and I'll fill in the result below.
+**Result: v1 4/6 failed. v2 0/6 failed.**
 
-**Result:** _(pending re-test — 0/6 or a measured reduction from the 6/15
-v1 rate, plus a check on whether the knee-replacement query stays clean
-across both v2 runs)_
+The more informative result isn't the score, it's *how* v2 stayed clean.
+v1's Jurisdiction K run 2 failed with: "...Jurisdiction K...is not part
+of this system's corpus, **you should verify** jurisdiction-specific
+nuances **directly through** the CGS Medicare LCD..." — phrasing that
+matches neither "you would need to" nor "it's advisable to consult," the
+two families v2's banned-phrase list explicitly names, and doesn't
+overlap with either of the two failing transcripts v2 was written from.
+If v2 were just a longer enumerated list, this is exactly the kind of
+paraphrase that would slip through it. It didn't: both v2 Jurisdiction K
+runs closed clean on genuinely different, non-overlapping wording ("as
+long as continued use criteria are met," "if the device is being
+replaced due to change in medical necessity rather than routine wear"),
+with no redirect of any kind. That's the intended effect of naming the
+underlying *function* ("don't point the user toward resolution
+elsewhere") rather than matching the redirect's previously-seen exact
+phrasings — it generalized past the instances it was written from,
+instead of covering only those instances.
+
+Knee replacement was clean on both v1 runs in this re-test (it had
+previously failed on B.4's second full-set run and was clean on the
+first) — consistent with it being the borderline, non-deterministic case
+documented in Example 3, not evidence against the fix.
 
 ## C.4 — Comparative Write-Up
 
-_(pending C.3 result — final pass to fold this into the main README once
-v2 is confirmed)_
+| | v1 | v2 |
+|---|---|---|
+| **Prompt file** | `prompts/v1_orchestrator_system_prompt.txt` | `prompts/v2_orchestrator_system_prompt.txt` |
+| **Closing instruction** | Bans a list of literal phrases ("if you'd like", "let me know if...", "I can also...") framed as *the* rule | States the underlying function first ("don't end by pointing the user toward resolution somewhere else — yourself later, or another party now"), with phrase families as illustrations, not the boundary |
+| **15-query set, advisory-redirect rate** | 3/15 → 6/15 across two runs (non-deterministic, increasing) | Not yet re-run against the full 15-query set — targeted 3-query re-test only |
+| **Targeted 3-query re-test (2 runs each)** | 4/6 failed | 0/6 failed |
+
+**Takeaway:** the lesson here isn't "add more banned phrases whenever you
+find a new bad one" — that's whack-a-mole, and v1's own history
+demonstrates it (the literal follow-up-offer ban didn't anticipate the
+advisory-redirect variant at all, despite both being the same underlying
+impulse). The lesson is that a negative instruction defined *as* an
+enumerated list only ever covers the surface forms it was written
+against. The fix that actually generalizes is one that names the
+underlying behavior to avoid, with phrase examples serving as
+illustrations of that behavior rather than as its complete definition.
+v2's result — 0/6 vs. v1's 4/6, including a clean close on wording that
+matches none of v2's own banned-phrase examples — is evidence for that
+generalization, not just a bigger list winning on coverage.
+
+**Open item, stated plainly rather than glossed over:** this re-test
+targeted the 3 examples that motivated the fix, not a full 15-query
+regression run. v2 hasn't yet been checked against the in-scope and
+fully-unrelated buckets, which weren't part of this targeted test, or
+re-run at B.4's own two-pass standard. A full 15-query run on v2 — ideally
+twice, matching v1's own two-run standard — is the natural next step
+before calling this fully closed, and would also confirm the fix doesn't
+introduce a new failure mode on buckets this targeted test didn't touch.
+
+Folded into the main [`README.md`](./README.md)'s Stage C section and
+Roadmap.
