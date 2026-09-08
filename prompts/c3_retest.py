@@ -21,6 +21,11 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+# Running this as `python prompts/c3_retest.py` puts prompts/ (this script's
+# own folder) on sys.path, not the project root — so orchestrator_graph.py
+# (which lives in the root, one level up) isn't importable without this.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from dotenv import load_dotenv
 load_dotenv()
 
